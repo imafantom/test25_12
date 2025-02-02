@@ -3,35 +3,48 @@ import random
 from enum import Enum
 
 ##############################################################################
-# 1) PAGE CONFIG: No 'theme' param to avoid older Streamlit issues
+# PAGE CONFIG - set page title & layout
 ##############################################################################
-st.set_page_config(
-    page_title="Grammar Genius App",
-    layout="wide"
-)
+st.set_page_config(page_title="Grammar Genius App", layout="wide")
 
 ##############################################################################
-# 2) ENUM FOR GRAMMAR CATEGORIES
+# ENUM FOR GRAMMAR CATEGORIES
 ##############################################################################
 class GrammarCategory(Enum):
     TENSES = "Tenses"
     CONDITIONALS = "Conditionals"
 
 ##############################################################################
-# 3) SESSION STATE
+# SESSION STATE + RANDOM MESSAGES
 ##############################################################################
+# Ensure reset_questions is declared before usage
+
+def reset_questions():
+    """
+    Clears answers, clears which questions were submitted, resets review mode,
+    and reshuffles motivational messages if they exist.
+    """
+    st.session_state.answers = []
+    st.session_state.submitted_questions = set()
+    st.session_state.review_mode = False
+    if "randomized_messages" in st.session_state:
+        random.shuffle(st.session_state["randomized_messages"])
+
 if "selected_category" not in st.session_state:
     st.session_state.selected_category = GrammarCategory.TENSES
+
 if "selected_item_key" not in st.session_state:
     st.session_state.selected_item_key = None
+
 if "answers" not in st.session_state:
     st.session_state.answers = []
+
 if "submitted_questions" not in st.session_state:
     st.session_state.submitted_questions = set()
+
 if "review_mode" not in st.session_state:
     st.session_state.review_mode = False
 
-# Ensure randomized_messages is defined before shuffling
 if "randomized_messages" not in st.session_state:
     st.session_state["randomized_messages"] = [
         "You're on fire! 🔥",
@@ -55,10 +68,11 @@ if "randomized_messages" not in st.session_state:
         "Remarkable! Each reply is like a linguistic symphony in action! 🎼🌍",
         "Spectacular! Your English prowess bursts forth like cosmic fireworks! 💥🚀🎉"
     ]
+
 random.shuffle(st.session_state["randomized_messages"])
 
 ##############################################################################
-# 4) CUSTOM CSS: Dark background, orange headings, dark-blue sidebar
+# CUSTOM CSS - Black background, orange headings, dark-blue sidebar
 ##############################################################################
 st.markdown("""
 <style>
@@ -88,40 +102,32 @@ main > div {
 """, unsafe_allow_html=True)
 
 ##############################################################################
-# 5) MASSIVE TENSES AND CONDITIONALS DATA
+# HELPER DATA BUILDERS: 20 Exercises for Tenses & Conditionals
 ##############################################################################
 def build_20_exercises_for_tense(tense_name):
-    """
-    Returns a list of 20 usage cases for a given tense_name,
-    each is a multiple-choice exercise with an explanation.
-    We'll vary them slightly: some negative, some questions, etc.
-    """
     usage_cases = []
     for i in range(1, 21):
         question_type = "multiple_choice"
-        # We'll define different patterns for variety
+        # We'll alternate Affirmative, Negative, Question patterns
         if i % 3 == 1:
-            # Affirmative pattern
-            question = f"He ________ {tense_name} practice each week (#{i})."
+            question = f"He ________ {tense_name} tasks each week (#{i})."
             choices = ["does", "do", "doesn't"]
             correct_choice = "does"
-            explanation = f"In {tense_name}, 'He' often uses 'does' for emphasis in statements."
+            explanation = f"For {tense_name}, 'He' often uses 'does' in present contexts."
         elif i % 3 == 2:
-            # Negative pattern
-            question = f"They ________ {tense_name} properly yet (#{i})."
-            choices = ["haven't done", "didn't do", "don't do"]
-            correct_choice = "haven't done"
-            explanation = f"Negative forms in {tense_name} can use 'haven't' + participle for certain contexts."
+            question = f"They ________ any {tense_name} exercises (#{i})."
+            choices = ["do not do", "didn't do", "haven't done"]
+            correct_choice = "do not do"
+            explanation = f"In {tense_name}, we might use 'do not do' for a simple negative."
         else:
-            # Question pattern
-            question = f"________ you handle {tense_name} tasks every day (#{i})?"
+            question = f"________ you apply {tense_name} daily (#{i})?"
             choices = ["Do", "Will", "Have"]
             correct_choice = "Do"
-            explanation = f"To form a question in {tense_name}, we often start with 'Do' for a general question."
+            explanation = f"In {tense_name}, forming questions with 'Do' + subject is standard."
 
         usage_cases.append({
             "title": f"Case #{i}",
-            "context": f"Practice scenario for {tense_name}, example {i}.",
+            "context": f"Scenario for {tense_name}, example {i}.",
             "question_type": question_type,
             "question": question,
             "choices": choices,
@@ -131,33 +137,28 @@ def build_20_exercises_for_tense(tense_name):
     return usage_cases
 
 def build_20_exercises_for_conditional(cond_name):
-    """
-    Returns 20 usage cases for a given conditional name,
-    each is a multiple-choice exercise with an explanation.
-    We'll vary them slightly: some negative, some questions, etc.
-    """
     usage_cases = []
     for i in range(1, 21):
         question_type = "multiple_choice"
         if i % 3 == 1:
-            question = f"If you ________ me, I might finish the {cond_name} earlier (#{i})."
-            choices = ["help", "helps", "helped"]
-            correct_choice = "help"
-            explanation = f"For a {cond_name}, we often use 'if' + present simple, then a modal in the main clause."
+            question = f"If you ________ the {cond_name}, you might succeed (#{i})."
+            choices = ["follow", "follows", "following"]
+            correct_choice = "follow"
+            explanation = f"For {cond_name}, 'if' + present simple => main clause can have 'might'."
         elif i % 3 == 2:
-            question = f"If we don't hurry, we ________ the deal in {cond_name} (#{i})."
-            choices = ["won't get", "wouldn't get", "haven't got"]
-            correct_choice = "won't get"
-            explanation = f"Typical future {cond_name} structure uses 'won't' + base form for negative outcomes."
+            question = f"If they didn't hurry, they ________ it in {cond_name} (#{i})."
+            choices = ["wouldn't get", "won't get", "haven't got"]
+            correct_choice = "wouldn't get"
+            explanation = f"{cond_name}: 'wouldn't' + base form for negative hypothetical outcomes."
         else:
-            question = f"________ they learn quickly if they needed {cond_name} advice (#{i})?"
+            question = f"________ you handle {cond_name} conditions if needed (#{i})?"
             choices = ["Would", "Do", "Are"]
             correct_choice = "Would"
-            explanation = f"For hypothetical {cond_name}, 'Would' + subject is common in the main clause."
+            explanation = f"In {cond_name}, 'Would you ...?' is typical for hypothetical questions."
 
         usage_cases.append({
             "title": f"Case #{i}",
-            "context": f"Practice scenario for {cond_name}, example {i}.",
+            "context": f"Real-life scenario for {cond_name}, example {i}",
             "question_type": question_type,
             "question": question,
             "choices": choices,
@@ -166,24 +167,25 @@ def build_20_exercises_for_conditional(cond_name):
         })
     return usage_cases
 
-# 7 Tenses: Present Simple, Past Simple, Present Continuous, Past Continuous, Present Perfect, Future Simple, Future Continuous
+##############################################################################
+# TENSES DATA (7 Tenses) with 20 usage cases each
+##############################################################################
 tenses_data = {
     "1": {
         "name": "Present Simple",
         "formation": {
             "Positive": "Subject + base form",
-            "Negative": "Subject + do not/does not + base form",
+            "Negative": "Subject + do/does + not + base form",
             "Question": "Do/Does + subject + base form?",
-            "Short answer": "'Yes, I do.' / 'No, I don't.'"
+            "Short answer": "Yes, I do / No, I don't"
         },
         "usage_explanation": [
-            "General truths or repeated actions.",
-            "Habits or routines."
+            "General truths, habits, and routines."
         ],
         "usage_cases": build_20_exercises_for_tense("Present Simple"),
         "extra_examples": [
-            "I play tennis every weekend.",
-            "He doesn't like coffee."
+            "I play tennis on Sundays.",
+            "He doesn't eat seafood."
         ]
     },
     "2": {
@@ -192,16 +194,15 @@ tenses_data = {
             "Positive": "Subject + past form",
             "Negative": "Subject + did not + base form",
             "Question": "Did + subject + base form?",
-            "Short answer": "'Yes, I did.' / 'No, I didn't.'"
+            "Short answer": "Yes, I did / No, I didn't"
         },
         "usage_explanation": [
-            "Completed actions in the past.",
-            "Actions at a specific time."
+            "Actions completed at a specific time in the past."
         ],
         "usage_cases": build_20_exercises_for_tense("Past Simple"),
         "extra_examples": [
-            "I visited France last year.",
-            "They didn't see the movie."
+            "I visited Rome last year.",
+            "They didn't like the movie."
         ]
     },
     "3": {
@@ -210,16 +211,15 @@ tenses_data = {
             "Positive": "Subject + am/is/are + verb-ing",
             "Negative": "Subject + am/is/are + not + verb-ing",
             "Question": "Am/Is/Are + subject + verb-ing?",
-            "Short answer": "'Yes, I am.' / 'No, I'm not.'"
+            "Short answer": "Yes, I am / No, I'm not"
         },
         "usage_explanation": [
-            "Actions happening now.",
-            "Temporary situations or changing states."
+            "Actions happening right now, temporary situations."
         ],
         "usage_cases": build_20_exercises_for_tense("Present Continuous"),
         "extra_examples": [
-            "I am studying English right now.",
-            "She isn't working today."
+            "I am learning Spanish at the moment.",
+            "She isn't working this week."
         ]
     },
     "4": {
@@ -228,16 +228,15 @@ tenses_data = {
             "Positive": "Subject + was/were + verb-ing",
             "Negative": "Subject + was/were + not + verb-ing",
             "Question": "Was/Were + subject + verb-ing?",
-            "Short answer": "'Yes, I was.' / 'No, I wasn't.'"
+            "Short answer": "Yes, I was / No, I wasn't"
         },
         "usage_explanation": [
-            "Actions in progress at a moment in the past.",
-            "Background actions interrupted by another event."
+            "Actions in progress at a moment in the past, or interrupted actions."
         ],
         "usage_cases": build_20_exercises_for_tense("Past Continuous"),
         "extra_examples": [
-            "They were walking when it started to rain.",
-            "I wasn't sleeping at midnight."
+            "I was driving when you called.",
+            "They weren't sleeping at midnight."
         ]
     },
     "5": {
@@ -246,16 +245,15 @@ tenses_data = {
             "Positive": "Subject + have/has + past participle",
             "Negative": "Subject + have/has + not + past participle",
             "Question": "Have/Has + subject + past participle?",
-            "Short answer": "'Yes, I have.' / 'No, I haven't.'"
+            "Short answer": "Yes, I have / No, I haven't"
         },
         "usage_explanation": [
-            "Actions with unspecified time or continuing until now.",
-            "Life experiences or events affecting the present."
+            "Actions from the past that affect the present or have no specified time."
         ],
         "usage_cases": build_20_exercises_for_tense("Present Perfect"),
         "extra_examples": [
-            "I have seen that movie before.",
-            "She hasn't finished her homework."
+            "I have seen that film twice.",
+            "She hasn't finished her project yet."
         ]
     },
     "6": {
@@ -264,16 +262,15 @@ tenses_data = {
             "Positive": "Subject + will + base form",
             "Negative": "Subject + will + not + base form",
             "Question": "Will + subject + base form?",
-            "Short answer": "'Yes, I will.' / 'No, I won't.'"
+            "Short answer": "Yes, I will / No, I won't"
         },
         "usage_explanation": [
-            "Spontaneous decisions, predictions, promises/offers.",
-            "Future facts or certainties."
+            "Spontaneous decisions, predictions, offers, promises."
         ],
         "usage_cases": build_20_exercises_for_tense("Future Simple"),
         "extra_examples": [
-            "We will travel next year.",
-            "He won't agree to that plan."
+            "We will travel next month.",
+            "He won't agree to that idea."
         ]
     },
     "7": {
@@ -282,71 +279,39 @@ tenses_data = {
             "Positive": "Subject + will be + verb-ing",
             "Negative": "Subject + will + not + be + verb-ing",
             "Question": "Will + subject + be + verb-ing?",
-            "Short answer": "'Yes, I will.' / 'No, I won't.'"
+            "Short answer": "Yes, I will / No, I won't"
         },
         "usage_explanation": [
-            "Actions that will be in progress at a future time.",
-            "Polite inquiries about someone's plans."
+            "Actions that will be ongoing at a certain time in the future."
         ],
         "usage_cases": build_20_exercises_for_tense("Future Continuous"),
         "extra_examples": [
-            "They will be waiting for you at 7 PM.",
-            "I won't be working tomorrow afternoon."
+            "I will be waiting for you at noon.",
+            "They won't be working on Sunday."
         ]
     }
 }
 
-def build_20_exercises_for_conditional_name(cond_name):
-    """
-    Helper for building 20 usage cases for each conditional item.
-    """
-    usage_cases = []
-    for i in range(1,21):
-        if i % 3 == 1:
-            question = f"If you ________ the {cond_name}, you might succeed (#{i})."
-            choices = ["fulfill", "fulfills", "fulfilling"]
-            correct_choice = "fulfill"
-            explanation = f"Typically 'if' + present simple (like 'you fulfill') for {cond_name} scenario."
-        elif i % 3 == 2:
-            question = f"If they didn't hurry, they ________ the result in {cond_name} (#{i})."
-            choices = ["wouldn't get", "won't get", "haven't got"]
-            correct_choice = "wouldn't get"
-            explanation = f"For hypothetical {cond_name}, 'wouldn't' + base form is common in the main clause."
-        else:
-            question = f"________ you manage the {cond_name} if you needed help (#{i})?"
-            choices = ["Would", "Do", "Have"]
-            correct_choice = "Would"
-            explanation = f"For hypothetical or uncertain {cond_name}, 'Would' + subject is typical."
-
-        usage_cases.append({
-            "title": f"Case #{i}",
-            "context": f"Real-life scenario for {cond_name}, example {i}",
-            "question_type": "multiple_choice",
-            "question": question,
-            "choices": choices,
-            "correct_choice": correct_choice,
-            "explanation": explanation
-        })
-    return usage_cases
-
-# 5 Conditionals: Zero, First, Second, Third, Mixed
+##############################################################################
+# 5 CONDITIONALS: Zero, First, Second, Third, Mixed (each 20 usage cases)
+##############################################################################
 conditionals_data = {
     "0": {
         "name": "Zero Conditional",
         "formation": {
             "Positive": "If + present simple, present simple",
             "Negative": "If + present simple, present simple (negative)",
-            "Question": "Do/Does + subject + base form",
+            "Question": "Do/Does + subject + base form?",
             "Short answer": "N/A"
         },
         "usage_explanation": [
             "Facts always true under certain conditions.",
             "General truths or cause-and-effect."
         ],
-        "usage_cases": build_20_exercises_for_conditional_name("Zero Conditional"),
+        "usage_cases": build_20_exercises_for_conditional("Zero Conditional"),
         "extra_examples": [
             "If you heat water, it boils.",
-            "If you press Ctrl+S, your document is saved."
+            "If you leave ice in the sun, it melts."
         ]
     },
     "1": {
@@ -355,16 +320,16 @@ conditionals_data = {
             "Positive": "If + present simple, will + base form",
             "Negative": "If + present simple, will + not + base form",
             "Question": "Will + subject + base form?",
-            "Short answer": "Yes, I will. / No, I won't."
+            "Short answer": "Yes, I will / No, I won't"
         },
         "usage_explanation": [
             "Real or likely future situations.",
-            "Cause-and-effect in the future."
+            "Cause-effect in the future."
         ],
-        "usage_cases": build_20_exercises_for_conditional_name("First Conditional"),
+        "usage_cases": build_20_exercises_for_conditional("First Conditional"),
         "extra_examples": [
-            "If it rains, I will take an umbrella.",
-            "If we don't hurry, we'll miss the train."
+            "If it rains, I'll take an umbrella.",
+            "If we don't hurry, we'll miss the bus."
         ]
     },
     "2": {
@@ -373,16 +338,16 @@ conditionals_data = {
             "Positive": "If + past simple, would + base form",
             "Negative": "If + past simple, would + not + base form",
             "Question": "Would + subject + base form?",
-            "Short answer": "Yes, I would. / No, I wouldn't."
+            "Short answer": "Yes, I would / No, I wouldn't"
         },
         "usage_explanation": [
-            "Unreal or imaginary situations in the present/future.",
+            "Unreal/imaginary situations in the present/future.",
             "Hypothetical or unlikely scenarios."
         ],
-        "usage_cases": build_20_exercises_for_conditional_name("Second Conditional"),
+        "usage_cases": build_20_exercises_for_conditional("Second Conditional"),
         "extra_examples": [
             "If I had a car, I would drive to the beach.",
-            "If she were here, she'd fix this quickly."
+            "She would help if she were here."
         ]
     },
     "3": {
@@ -391,16 +356,15 @@ conditionals_data = {
             "Positive": "If + past perfect, would + have + past participle",
             "Negative": "If + past perfect, would + not + have + past participle",
             "Question": "Would + subject + have + past participle?",
-            "Short answer": "Yes, I would have. / No, I wouldn't have."
+            "Short answer": "Yes, I would've / No, I wouldn't have"
         },
         "usage_explanation": [
-            "Talking about past situations that didn't happen.",
-            "Imagining different outcomes if the past had changed."
+            "Past situations that didn't happen, imagining different outcomes."
         ],
-        "usage_cases": build_20_exercises_for_conditional_name("Third Conditional"),
+        "usage_cases": build_20_exercises_for_conditional("Third Conditional"),
         "extra_examples": [
-            "If I had known, I would have come earlier.",
-            "We wouldn't have missed the flight if we had left on time."
+            "If I had known, I would've arrived earlier.",
+            "We wouldn't have missed the show if we had left on time."
         ]
     },
     "4": {
@@ -408,44 +372,53 @@ conditionals_data = {
         "formation": {
             "Positive": "If + past perfect, would + base form",
             "Negative": "If + past perfect, would + not + base form",
-            "Question": "Would + subject + base form? (main clause), past perfect (if-clause)",
-            "Short answer": "Yes, I would. / No, I wouldn't."
+            "Question": "Would + subject + base form? (if-clause in past perfect)",
+            "Short answer": "Yes, I would / No, I wouldn't"
         },
         "usage_explanation": [
-            "Combines a past hypothetical condition with a present or future result.",
-            "Used when the time in the if-clause and main clause differ."
+            "Combines a past hypothetical with a present/future result."
         ],
-        "usage_cases": build_20_exercises_for_conditional_name("Mixed Conditional"),
+        "usage_cases": build_20_exercises_for_conditional("Mixed Conditional"),
         "extra_examples": [
-            "If I had studied medicine, I would be a doctor now.",
-            "She would be living in Spain if she had married Juan."
+            "If I had studied medicine, I'd be a doctor now.",
+            "If he had left on time, he wouldn't be stuck in traffic right now."
         ]
     }
 }
 
 ##############################################################################
-# 6) HELPER: reset_questions, get_current_data defined above
+# HELPER: get_current_data()
 ##############################################################################
+def get_current_data():
+    """Returns (data_dict, item_key) for whichever Tense/Conditional is chosen."""
+    if st.session_state.selected_category == GrammarCategory.TENSES:
+        if st.session_state.selected_item_key:
+            return tenses_data, st.session_state.selected_item_key
+        else:
+            return None, None
+    else:
+        if st.session_state.selected_item_key:
+            return conditionals_data, st.session_state.selected_item_key
+        else:
+            return None, None
 
 ##############################################################################
-# 7) SIDEBAR CODE
+# SIDEBAR CODE
 ##############################################################################
 st.sidebar.title("Grammar Categories")
 
-category = st.sidebar.radio("Select a category:", [GrammarCategory.TENSES.value, GrammarCategory.CONDITIONALS.value])
-# Convert the chosen string back to the enum
-if category == "Tenses":
+cat_choice = st.sidebar.radio("Select a category:", [GrammarCategory.TENSES.value, GrammarCategory.CONDITIONALS.value])
+if cat_choice == GrammarCategory.TENSES.value:
     st.session_state.selected_category = GrammarCategory.TENSES
 else:
     st.session_state.selected_category = GrammarCategory.CONDITIONALS
 
-# Grammar item selector
 if st.session_state.selected_category == GrammarCategory.TENSES:
     st.sidebar.subheader("Select a Tense")
-    tense_options = ["Select a tense..."] + [f"{key}. {tenses_data[key]['name']}" for key in tenses_data]
-    selected_option = st.sidebar.selectbox("Choose a tense:", tense_options)
-    if selected_option != "Select a tense...":
-        key_str = selected_option.split('.')[0].strip()
+    tense_opts = ["Select a tense..."] + [f"{k}. {tenses_data[k]['name']}" for k in tenses_data]
+    chosen_tense = st.sidebar.selectbox("Choose a tense:", tense_opts)
+    if chosen_tense != "Select a tense...":
+        key_str = chosen_tense.split('.')[0].strip()
         if key_str != st.session_state.selected_item_key:
             st.session_state.selected_item_key = key_str
             reset_questions()
@@ -454,10 +427,10 @@ if st.session_state.selected_category == GrammarCategory.TENSES:
         reset_questions()
 else:
     st.sidebar.subheader("Select a Conditional")
-    conditional_options = ["Select a conditional..."] + [f"{key}. {conditionals_data[key]['name']}" for key in conditionals_data]
-    selected_option = st.sidebar.selectbox("Choose a conditional:", conditional_options)
-    if selected_option != "Select a conditional...":
-        key_str = selected_option.split('.')[0].strip()
+    cond_opts = ["Select a conditional..."] + [f"{k}. {conditionals_data[k]['name']}" for k in conditionals_data]
+    chosen_cond = st.sidebar.selectbox("Choose a conditional:", cond_opts)
+    if chosen_cond != "Select a conditional...":
+        key_str = chosen_cond.split('.')[0].strip()
         if key_str != st.session_state.selected_item_key:
             st.session_state.selected_item_key = key_str
             reset_questions()
@@ -466,7 +439,7 @@ else:
         reset_questions()
 
 ##############################################################################
-# 8) SCREENS
+# SCREENS
 ##############################################################################
 def show_welcome():
     st.title("Welcome to the Grammar Genius Game! 🎉✨🎮")
@@ -475,8 +448,9 @@ def show_welcome():
     
     1. Use the sidebar to choose Tenses or Conditionals.
     2. Select which Tense/Conditional you want to practice.
-    3. Each item has 20 multiple-choice exercises (including negative & question forms).
-    4. After answering all exercises, you'll earn a special badge and can review your answers!
+    3. Each item has 20 multiple-choice exercises, including negative & question forms.
+    4. Answer them all to unlock a special 'Expert!' badge!
+    5. You can also review your answers afterward.
     """)
 
 def show_review(data_dict, item_key):
@@ -488,17 +462,11 @@ def show_review(data_dict, item_key):
             st.write(f"Question: {case['question']}")
         user_answer = st.session_state.get(f"answer_{item_key}_{i}", "")
         st.write(f"Your answer: {user_answer} 🏆")
-    st.write("Great job! Feel free to pick another grammar item from the sidebar if you want.")
+    st.write("Great job! Feel free to pick another item from the sidebar if you wish.")
 
 def show_explanation_and_questions():
-    # Determine which dictionary to use
-    if st.session_state.selected_category == GrammarCategory.TENSES:
-        data_dict = tenses_data
-    else:
-        data_dict = conditionals_data
-
-    item_key = st.session_state.selected_item_key
-    if not item_key:
+    data_dict, item_key = get_current_data()
+    if not data_dict or not item_key:
         return
 
     info = data_dict[item_key]
@@ -525,7 +493,7 @@ def show_explanation_and_questions():
         show_review(data_dict, item_key)
         return
 
-    st.write("### Practice Exercises (Multiple Choice)")
+    st.write("### Practice Exercises")
     colA, colB = st.columns(2)
     colA.metric("Exercises Answered", f"{answered_count}")
     colB.metric("Total Exercises", f"{total_questions}")
@@ -533,7 +501,7 @@ def show_explanation_and_questions():
     progress_val = int((answered_count / total_questions) * 100)
     st.progress(progress_val)
 
-    # If all answered, award a badge
+    # If all answered, user gets a badge
     if answered_count == total_questions:
         st.success(f"You've completed all {total_questions} exercises for {info['name']}!")
         st.markdown(f"**Badge Unlocked:** *{info['name']} Expert!* 🏆")
@@ -541,12 +509,12 @@ def show_explanation_and_questions():
             st.session_state.review_mode = True
         return
 
-    # Show each usage case
+    # Display each usage case
     for i, case in enumerate(usage_cases):
         answer_key = f"answer_{item_key}_{i}"
         submit_key = f"submit_{item_key}_{i}"
 
-        # If the user already submitted this question, just show their answer
+        # If already answered
         if submit_key in st.session_state.submitted_questions:
             st.write(f"**{case['title']}**")
             if "context" in case:
@@ -556,25 +524,23 @@ def show_explanation_and_questions():
             st.write(f"Your answer: {user_answer}")
             continue
 
-        # Display question
         st.write(f"**{case['title']}**")
         if "context" in case:
             st.write(f"Context: {case['context']}")
         st.write(case["question"])
 
         choices = case.get("choices", [])
-        correct_choice = case.get("correct_choice", None)
+        correct_choice = case.get("correct_choice", "")
         explanation = case.get("explanation", "")
 
         st.session_state.setdefault(answer_key, "")
         user_answer = st.selectbox("Select your answer:", ["-- Select --"] + choices, key=answer_key)
 
-        # Submission
         if st.button("Submit", key=submit_key):
             st.session_state.answers.append(user_answer)
             st.session_state.submitted_questions.add(submit_key)
 
-            # Find a motivational message
+            # Determine motivational message
             msg_index = len(st.session_state.answers) - 1
             if msg_index < len(st.session_state["randomized_messages"]):
                 msg = st.session_state["randomized_messages"][msg_index]
@@ -586,7 +552,7 @@ def show_explanation_and_questions():
                 st.session_state.answers.pop()
                 st.session_state.submitted_questions.discard(submit_key)
                 st.stop()
-            elif correct_choice and user_answer == correct_choice:
+            elif user_answer == correct_choice:
                 st.success("Correct! " + msg)
                 if explanation:
                     st.info(f"Explanation: {explanation}")
@@ -599,10 +565,10 @@ def show_explanation_and_questions():
             st.write(f"Your answer: {user_answer}")
 
 ##############################################################################
-# 9) MAIN FUNCTION
+# MAIN EXECUTION
 ##############################################################################
 def main():
-    # 1) If no item chosen, show welcome, else the practice screen
+    # If no item is selected, show welcome
     if st.session_state.selected_item_key is None:
         show_welcome()
     else:
