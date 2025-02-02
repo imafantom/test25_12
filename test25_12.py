@@ -3,9 +3,12 @@ import random
 from enum import Enum
 
 ##############################################################################
-# 1) PAGE CONFIG (No 'theme' parameter to avoid TypeError on older versions)
+# 1) PAGE CONFIG -- No 'theme' parameter to avoid TypeError on older versions
 ##############################################################################
-st.set_page_config(page_title="Grammar Genius App", layout="wide")
+st.set_page_config(
+    page_title="Grammar Genius App",
+    layout="wide"
+)
 
 ##############################################################################
 # 2) ENUM FOR GRAMMAR CATEGORIES
@@ -63,7 +66,7 @@ THEMES = {
         "sidebar_bg": "#013369",
         "sidebar_color": "#ffffff",
         "heading_color": "#ff5722",
-        "font_size": "20px"  # default value; actual size will be replaced
+        "font_size": "20px"  # default; will be replaced dynamically
     },
     "Light": {
         "main_bg": "#ffffff",
@@ -118,7 +121,7 @@ main > div {
 
 ##############################################################################
 # 5) SAMPLE TENSES AND CONDITIONALS DATA
-#    (For full deployment, expand each to 20 usage cases.)
+#    (For full deployment, replace these with 20 usage cases each)
 ##############################################################################
 def sample_tenses_data():
     return {
@@ -132,9 +135,8 @@ def sample_tenses_data():
                 "Short answer": "'Yes, I do.' / 'No, I don't.'"
             },
             "usage_explanation": [
-                "Used for general truths.",
-                "Describes habitual actions.",
-                "States routines."
+                "Used for general or always true facts.",
+                "Describes habitual actions and routines."
             ],
             "usage_cases": [
                 {
@@ -148,23 +150,23 @@ def sample_tenses_data():
                 },
                 {
                     "title": "Fact Exercise (2)",
-                    "context": "Think about a general truth.",
+                    "context": "Think about a scientific fact.",
                     "question_type": "multiple_choice",
                     "question": "Water ________ at 100°C.",
                     "choices": ["boil", "boils", "boiled"],
                     "correct_choice": "boils",
-                    "explanation": "Singular nouns take the '-s' ending in the Present Simple."
+                    "explanation": "Since water is singular, use 'boils' in Present Simple."
                 },
                 {
                     "title": "Negative Sentence (3)",
-                    "context": "Formulate a negative sentence about routine.",
+                    "context": "Form a negative statement about routine.",
                     "question_type": "multiple_choice",
                     "question": "She ________ coffee in the morning.",
                     "choices": ["don't drink", "doesn't drink", "not drink"],
                     "correct_choice": "doesn't drink",
                     "explanation": "For third-person singular negatives, use 'doesn't' + base form."
                 }
-                # ... Extend to 20 usage cases ...
+                # ... (extend up to 20 usage cases) ...
             ],
             "extra_examples": [
                 "I always wake up at 7 AM.",
@@ -187,38 +189,38 @@ def sample_conditionals_data():
                 "Short answer": "N/A"
             },
             "usage_explanation": [
-                "Describes general truths under certain conditions.",
-                "Expresses cause and effect."
+                "Expresses facts that are always true under certain conditions.",
+                "Shows cause and effect in general situations."
             ],
             "usage_cases": [
                 {
                     "title": "General Truth (1)",
-                    "context": "Think of everyday cause and effect.",
+                    "context": "Everyday cause and effect.",
                     "question_type": "multiple_choice",
                     "question": "If you don't water plants, they ________.",
                     "choices": ["die", "dies", "died"],
                     "correct_choice": "die",
-                    "explanation": "In Zero Conditional, both clauses use the present simple."
+                    "explanation": "Both clauses use the present simple in Zero Conditional."
                 },
                 {
                     "title": "Scientific Fact (2)",
-                    "context": "Consider a scientific cause-effect.",
+                    "context": "A typical scientific scenario.",
                     "question_type": "multiple_choice",
                     "question": "If you heat ice, it ________.",
                     "choices": ["melt", "melts", "melted"],
                     "correct_choice": "melts",
-                    "explanation": "For a general fact, use present simple in both clauses."
+                    "explanation": "Zero Conditional: use present simple in both clauses."
                 },
                 {
-                    "title": "Negative Statement (3)",
-                    "context": "Use a negative in a zero conditional.",
+                    "title": "Negative Example (3)",
+                    "context": "Express a negative result.",
                     "question_type": "multiple_choice",
                     "question": "If you don't exercise, you ________ healthy.",
                     "choices": ["are not", "aren't", "isn't"],
                     "correct_choice": "aren't",
-                    "explanation": "Use 'aren't' for negative form in present simple with 'you'."
+                    "explanation": "For 'you' in present simple, the negative contraction is 'aren't.'"
                 }
-                # ... Extend to 20 usage cases ...
+                # ... (extend up to 20 usage cases) ...
             ],
             "extra_examples": [
                 "If you freeze water, it becomes ice.",
@@ -228,20 +230,22 @@ def sample_conditionals_data():
         # ... Define 4 more conditionals similarly ...
     }
 
-# For demonstration, use sample data:
+# For demonstration, we use sample data:
 tenses_data = sample_tenses_data()
 conditionals_data = sample_conditionals_data()
 
 ##############################################################################
-# 6) HELPER FUNCTIONS (reset, get_current_data)
+# 6) HELPER FUNCTIONS
 ##############################################################################
 def reset_questions():
+    """Clear answers, submitted questions, reset review mode, and reshuffle messages."""
     st.session_state.answers = []
     st.session_state.submitted_questions = set()
     st.session_state.review_mode = False
     random.shuffle(st.session_state.randomized_messages)
 
 def get_current_data():
+    """Return the correct data dictionary and item key based on the selected category."""
     if st.session_state.selected_category == GrammarCategory.TENSES:
         if st.session_state.selected_item_key:
             return tenses_data, st.session_state.selected_item_key
@@ -254,7 +258,7 @@ def get_current_data():
             return None, None
 
 ##############################################################################
-# 7) SIDEBAR RENDERING FUNCTIONS
+# 7) SIDEBAR RENDERING
 ##############################################################################
 def render_grammar_item_selector():
     if st.session_state.selected_category == GrammarCategory.TENSES:
@@ -283,6 +287,7 @@ def render_grammar_item_selector():
             reset_questions()
 
 def render_sidebar():
+    """Render the sidebar with improved category, theme, and font size controls."""
     with st.sidebar:
         st.title("Grammar Navigator")
         
@@ -300,17 +305,17 @@ def render_sidebar():
         
         # 3. Theme Selection
         theme = st.radio("Color Theme:", options=list(THEMES.keys()), index=0)
+        
         # 4. Font Size Selection
         font_size = st.radio("Font Size:", ["Small", "Medium", "Large"], index=1)
-        # Update the theme dictionary with selected font size
         font_map = {"Small": "16px", "Medium": "20px", "Large": "24px"}
         THEMES[theme]["font_size"] = font_map.get(font_size, "20px")
+        
         # Inject dynamic CSS
-        css_to_inject = CSS_TEMPLATE.format(**THEMES[theme])
-        st.markdown(css_to_inject, unsafe_allow_html=True)
+        st.markdown(CSS_TEMPLATE.format(**THEMES[theme]), unsafe_allow_html=True)
 
 ##############################################################################
-# 8) SCREENS: Welcome, Review, and Practice Exercises
+# 8) SCREENS
 ##############################################################################
 def show_welcome():
     st.title("Welcome to the Grammar Genius Game! 🎉✨🎮")
@@ -319,9 +324,9 @@ def show_welcome():
     
     1. Use the sidebar to choose either Tenses or Conditionals.
     2. Select which Tense/Conditional you want to practice.
-    3. Each item includes 20 exercises (sample here shows a few).
+    3. Each item contains multiple exercises (20 recommended per item).
     4. Answer the exercises and receive immediate feedback with explanations.
-    5. Earn a special badge when you complete all exercises!
+    5. Earn a special badge upon completion!
     """)
 
 def show_review(data_dict, item_key):
@@ -333,16 +338,11 @@ def show_review(data_dict, item_key):
             st.write(f"Question: {case['question']}")
         user_answer = st.session_state.get(f"answer_{item_key}_{i}", "")
         st.write(f"Your answer: {user_answer} 🏆")
-    st.write("Great job! Feel free to pick another grammar item from the sidebar.")
+    st.write("Great job! Feel free to choose another grammar item from the sidebar.")
 
 def show_explanation_and_questions():
-    if st.session_state.selected_category == GrammarCategory.TENSES:
-        data_dict = tenses_data
-    else:
-        data_dict = conditionals_data
-
-    item_key = st.session_state.selected_item_key
-    if not item_key:
+    data_dict, item_key = get_current_data()
+    if not data_dict or not item_key:
         return
 
     info = data_dict[item_key]
@@ -373,7 +373,7 @@ def show_explanation_and_questions():
         show_review(data_dict, item_key)
         return
 
-    st.write("### Practice Exercises (Multiple-Choice)")
+    st.write("### Practice Exercises")
     colA, colB = st.columns(2)
     colA.metric("Exercises Answered", f"{answered_count}")
     colB.metric("Total Exercises", f"{total_questions}")
@@ -388,11 +388,12 @@ def show_explanation_and_questions():
             st.session_state.review_mode = True
         return
 
+    # Display each exercise
     for i, case in enumerate(usage_cases):
         answer_key = f"answer_{item_key}_{i}"
         submit_key = f"submit_{item_key}_{i}"
         question_type = case.get("question_type", "open_ended")
-
+        
         if submit_key in st.session_state.submitted_questions:
             st.write(f"**{case['title']}**")
             if "context" in case:
@@ -414,8 +415,7 @@ def show_explanation_and_questions():
             st.session_state.setdefault(answer_key, "")
             user_answer = st.selectbox("Select your answer:", ["-- Select --"] + choices, key=answer_key)
         else:
-            st.text_input("Your answer:", key=answer_key)
-            user_answer = st.session_state.get(answer_key, "")
+            user_answer = st.text_input("Your answer:", key=answer_key)
 
         if st.button("Submit", key=submit_key):
             st.session_state.answers.append(user_answer)
@@ -443,7 +443,6 @@ def show_explanation_and_questions():
                     st.session_state.submitted_questions.remove(submit_key)
                     st.stop()
             else:
-                # For open-ended, we accept the answer and show motivational message
                 if msg and msg[0].isupper():
                     new_msg = f"{msg[0].lower() + msg[1:]}"
                 else:
@@ -464,3 +463,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
