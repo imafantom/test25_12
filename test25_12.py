@@ -5,10 +5,7 @@ from enum import Enum
 ##############################################################################
 # 1) PAGE CONFIG -- No 'theme' parameter to avoid TypeError on older versions
 ##############################################################################
-st.set_page_config(
-    page_title="Grammar Genius App",
-    layout="wide"
-)
+st.set_page_config(page_title="Grammar Genius App", layout="wide")
 
 ##############################################################################
 # 2) ENUM FOR GRAMMAR CATEGORIES
@@ -53,7 +50,7 @@ if "randomized_messages" not in st.session_state:
         "Remarkable! Each reply is like a linguistic symphony in action! 🎼🌍",
         "Spectacular! Your English prowess bursts forth like cosmic fireworks! 💥🚀🎉"
     ]
-    random.shuffle(motivational_sentences)
+    random.shuffle(st.session_state.randomized_messages)
     st.session_state.randomized_messages = motivational_sentences
 
 ##############################################################################
@@ -121,7 +118,7 @@ main > div {
 
 ##############################################################################
 # 5) SAMPLE TENSES AND CONDITIONALS DATA
-#    (For full deployment, replace these with 20 usage cases each)
+#    (For full deployment, expand each to 20 usage cases)
 ##############################################################################
 def sample_tenses_data():
     return {
@@ -135,8 +132,8 @@ def sample_tenses_data():
                 "Short answer": "'Yes, I do.' / 'No, I don't.'"
             },
             "usage_explanation": [
-                "Used for general or always true facts.",
-                "Describes habitual actions and routines."
+                "Used for general truths and habits.",
+                "Describes routines and repeated actions."
             ],
             "usage_cases": [
                 {
@@ -146,27 +143,27 @@ def sample_tenses_data():
                     "question": "He ________ English every week.",
                     "choices": ["study", "studies", "studys"],
                     "correct_choice": "studies",
-                    "explanation": "For third-person singular, add 's' to the base form."
+                    "explanation": "For third-person singular in Present Simple, add 's' to the base form."
                 },
                 {
                     "title": "Fact Exercise (2)",
-                    "context": "Think about a scientific fact.",
+                    "context": "Think about a general truth.",
                     "question_type": "multiple_choice",
                     "question": "Water ________ at 100°C.",
                     "choices": ["boil", "boils", "boiled"],
                     "correct_choice": "boils",
-                    "explanation": "Since water is singular, use 'boils' in Present Simple."
+                    "explanation": "Water is treated as a singular noun; hence, 'boils' is used."
                 },
                 {
                     "title": "Negative Sentence (3)",
-                    "context": "Form a negative statement about routine.",
+                    "context": "Form a negative statement about a routine.",
                     "question_type": "multiple_choice",
                     "question": "She ________ coffee in the morning.",
                     "choices": ["don't drink", "doesn't drink", "not drink"],
                     "correct_choice": "doesn't drink",
-                    "explanation": "For third-person singular negatives, use 'doesn't' + base form."
+                    "explanation": "For third-person singular negatives in Present Simple, use 'doesn't' + base form."
                 }
-                # ... (extend up to 20 usage cases) ...
+                # ... (extend to 20 usage cases) ...
             ],
             "extra_examples": [
                 "I always wake up at 7 AM.",
@@ -189,8 +186,8 @@ def sample_conditionals_data():
                 "Short answer": "N/A"
             },
             "usage_explanation": [
-                "Expresses facts that are always true under certain conditions.",
-                "Shows cause and effect in general situations."
+                "Expresses general truths and cause-effect relationships.",
+                "Used for facts that are always true under certain conditions."
             ],
             "usage_cases": [
                 {
@@ -200,27 +197,27 @@ def sample_conditionals_data():
                     "question": "If you don't water plants, they ________.",
                     "choices": ["die", "dies", "died"],
                     "correct_choice": "die",
-                    "explanation": "Both clauses use the present simple in Zero Conditional."
+                    "explanation": "Zero Conditional: both clauses use present simple."
                 },
                 {
                     "title": "Scientific Fact (2)",
-                    "context": "A typical scientific scenario.",
+                    "context": "Consider a scientific scenario.",
                     "question_type": "multiple_choice",
                     "question": "If you heat ice, it ________.",
                     "choices": ["melt", "melts", "melted"],
                     "correct_choice": "melts",
-                    "explanation": "Zero Conditional: use present simple in both clauses."
+                    "explanation": "Use present simple in both clauses for a general fact."
                 },
                 {
-                    "title": "Negative Example (3)",
-                    "context": "Express a negative result.",
+                    "title": "Negative Statement (3)",
+                    "context": "Form a negative result.",
                     "question_type": "multiple_choice",
                     "question": "If you don't exercise, you ________ healthy.",
                     "choices": ["are not", "aren't", "isn't"],
                     "correct_choice": "aren't",
-                    "explanation": "For 'you' in present simple, the negative contraction is 'aren't.'"
+                    "explanation": "For 'you' in the present simple, 'aren't' is the correct contraction."
                 }
-                # ... (extend up to 20 usage cases) ...
+                # ... (extend to 20 usage cases) ...
             ],
             "extra_examples": [
                 "If you freeze water, it becomes ice.",
@@ -230,7 +227,7 @@ def sample_conditionals_data():
         # ... Define 4 more conditionals similarly ...
     }
 
-# For demonstration, we use sample data:
+# For demonstration purposes, we use sample data:
 tenses_data = sample_tenses_data()
 conditionals_data = sample_conditionals_data()
 
@@ -258,7 +255,7 @@ def get_current_data():
             return None, None
 
 ##############################################################################
-# 7) SIDEBAR RENDERING
+# 7) SIDEBAR RENDERING FUNCTIONS
 ##############################################################################
 def render_grammar_item_selector():
     if st.session_state.selected_category == GrammarCategory.TENSES:
@@ -311,7 +308,7 @@ def render_sidebar():
         font_map = {"Small": "16px", "Medium": "20px", "Large": "24px"}
         THEMES[theme]["font_size"] = font_map.get(font_size, "20px")
         
-        # Inject dynamic CSS
+        # Inject dynamic CSS based on theme and font size
         st.markdown(CSS_TEMPLATE.format(**THEMES[theme]), unsafe_allow_html=True)
 
 ##############################################################################
@@ -338,7 +335,7 @@ def show_review(data_dict, item_key):
             st.write(f"Question: {case['question']}")
         user_answer = st.session_state.get(f"answer_{item_key}_{i}", "")
         st.write(f"Your answer: {user_answer} 🏆")
-    st.write("Great job! Feel free to choose another grammar item from the sidebar.")
+    st.write("Great job! Feel free to pick another grammar item from the sidebar.")
 
 def show_explanation_and_questions():
     data_dict, item_key = get_current_data()
@@ -388,12 +385,11 @@ def show_explanation_and_questions():
             st.session_state.review_mode = True
         return
 
-    # Display each exercise
     for i, case in enumerate(usage_cases):
         answer_key = f"answer_{item_key}_{i}"
         submit_key = f"submit_{item_key}_{i}"
         question_type = case.get("question_type", "open_ended")
-        
+
         if submit_key in st.session_state.submitted_questions:
             st.write(f"**{case['title']}**")
             if "context" in case:
@@ -430,7 +426,7 @@ def show_explanation_and_questions():
             if user_answer == "-- Select --":
                 st.warning("You haven't selected an option yet.")
                 st.session_state.answers.pop()
-                st.session_state.submitted_questions.remove(submit_key)
+                st.session_state.submitted_questions.discard(submit_key)
                 st.stop()
             elif question_type == "multiple_choice":
                 if correct_choice and user_answer == correct_choice:
@@ -440,7 +436,7 @@ def show_explanation_and_questions():
                 else:
                     st.warning("Incorrect. Try again?")
                     st.session_state.answers.pop()
-                    st.session_state.submitted_questions.remove(submit_key)
+                    st.session_state.submitted_questions.discard(submit_key)
                     st.stop()
             else:
                 if msg and msg[0].isupper():
@@ -463,4 +459,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
